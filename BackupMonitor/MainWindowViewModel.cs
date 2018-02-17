@@ -18,7 +18,7 @@ namespace BackupMonitor
         public List<string> RefreshFrequencyList { get; set; }
         public BackupItem SelectedBackupItem { get; set; }
         private BackgroundWorker _bgLoadStatus;
-        private BackgroundWorker _bgCopyFiles;
+        private List<BackgroundWorker> _bgCopyFiles;
 
         private const string STATUS_UNKNOWN = "LOADING...";
         private const string STATUS_OK = "GOOD";
@@ -54,8 +54,9 @@ namespace BackupMonitor
             _bgLoadStatus.RunWorkerCompleted += _bgLoadStatus_RunWorkerCompleted;
             _bgLoadStatus.RunWorkerAsync();
 
-            _bgCopyFiles = new BackgroundWorker();
-            _bgCopyFiles.DoWork += CopyFilesBackground;
+            _bgCopyFiles = new List<BackgroundWorker>();
+            //_bgCopyFiles = new BackgroundWorker();
+            //_bgCopyFiles.DoWork += CopyFilesBackground;
         }
 
         private void _bgLoadStatus_DoWork(object sender, DoWorkEventArgs e)
@@ -74,17 +75,24 @@ namespace BackupMonitor
         }
         private void CopyFiles(BackupItem item)
         {
-            if (_bgCopyFiles.IsBusy)
-            {
-                StatusText = "Worker is busy. Try again later";
-            }
-            else
-            {
-                item.Status = STATUS_BACKINGUP;
-                //item.Note = CopyFiles(item.SourcePath, item.TargetPath, commandOptions);
-                //UpdateItemStatus(item);
-                _bgCopyFiles.RunWorkerAsync(item);
-            }
+            //if (_bgCopyFiles.IsBusy)
+            //{
+            //    StatusText = "Worker is busy. Try again later";
+            //}
+            //else
+            //{
+            //    item.Status = STATUS_BACKINGUP;
+            //    //item.Note = CopyFiles(item.SourcePath, item.TargetPath, commandOptions);
+            //    //UpdateItemStatus(item);
+            //    _bgCopyFiles.RunWorkerAsync(item);
+            //}
+            var bgCopyFiles = new BackgroundWorker();
+            bgCopyFiles.DoWork += CopyFilesBackground;
+            bgCopyFiles.RunWorkerCompleted += UpdateBackgroundWorkerStatus;
+            _bgCopyFiles.Add(bgCopyFiles);
+            StatusText = String.Format("Working on files for {0} folders", _bgCopyFiles.Count);
+            item.Status = STATUS_BACKINGUP;
+            bgCopyFiles.RunWorkerAsync(item);
         }
         private void CopyFilesBackground(object sender, DoWorkEventArgs e)
         {
@@ -93,6 +101,23 @@ namespace BackupMonitor
             UpdateItemStatus(item);
         }
 
+
+        private void UpdateBackgroundWorkerStatus(object sender, RunWorkerCompletedEventArgs e)
+        {
+            for (int i = _bgCopyFiles.Count - 1; i >= 0; i--)
+            {
+                var bw = _bgCopyFiles[i];
+                if (!bw.IsBusy)
+                {
+                    _bgCopyFiles.Remove(bw);
+                }
+            }
+            StatusText = string.Empty;
+            if (_bgCopyFiles.Count > 0)
+            {
+                StatusText = String.Format("Working on files for {0} folders", _bgCopyFiles.Count);
+            }
+        }
 
         private readonly RelayCommand _refreshScreenCommand;
         public ICommand RefreshScreenCommand
