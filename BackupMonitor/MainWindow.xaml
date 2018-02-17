@@ -1,0 +1,55 @@
+﻿<Window x:Class="BackupMonitor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Backup Monitor" Height="450" Width="600">
+    <Grid>
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Row="1" Grid.Column="5" Margin="5" >
+            <!--<Label>Refresh Frequency:</Label>
+            <ComboBox ItemsSource="{Binding RefreshFrequencyList}" SelectedItem="{Binding RefreshFrequency}"/>
+            <Line Width="20" Fill="Black" Height="5" Margin="5"/>-->
+            <Button Command="{Binding RefreshScreenCommand}" Content="Refresh"/>
+            <Line Width="20" Fill="Black" Height="5" Margin="5"/>
+            <TextBlock TextWrapping="WrapWithOverflow" Text="{Binding StatusText}"/>
+        </StackPanel>
+
+        <Label Grid.Row="0" Grid.Column="0">Name</Label>
+        <Label Grid.Row="0" Grid.Column="1">Source</Label>
+        <Label Grid.Row="0" Grid.Column="2">Target</Label>
+        <Label Grid.Row="0" Grid.Column="3">Status</Label>
+
+        <ListBox Grid.Row="1" Grid.ColumnSpan="5" ItemsSource="{Binding BackupItems}" SelectedItem="{Binding SelectedBackupItem}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="80"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" Content="{Binding Name}" ToolTip="{Binding Name}"/>
+                        <Label Grid.Column="1" Content="{Binding SourcePath}" ToolTip="{Binding SourcePath}"/>
+                        <Label Grid.Column="2" Content="{Binding TargetPath}" ToolTip="{Binding TargetPath}"/>
+                        <Label Grid.Column="3" Content="{Binding Status}" ToolTip="{Binding Note}"/>
+                        <Button Grid.Column="4" Content="Update" Margin="15,5" Command="{Binding RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}, Path=DataContext.CopyFilesCommand}" CommandParameter="{Binding}" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</Window>
